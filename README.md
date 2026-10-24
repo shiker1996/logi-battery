@@ -1,38 +1,47 @@
 # LogiBattery
 
-Windows 电量面板小工具，针对 Logitech Logi Bolt / Unifying / 部分 Lightspeed 接收器及通过 USB 数据线直连的 HID++ 设备，使用只读请求读取电量和充电状态。
+给已经在用 Logitech / Logi 键盘和鼠标的 Windows 用户。
 
-## 启动
+如果你平时只是为了查看键鼠电量，才需要安装或打开 **Logitech G HUB**、**Logi Options+**，LogiBattery 可以直接显示兼容设备的电量与充电状态，并在电量偏低时发送 Windows 通知。对支持的设备来说，查看电量不需要让这两个官方软件常驻运行。
 
-1. 双击 `setup.bat` 安装 Python 运行依赖（只需一次）。
-2. 双击 `启动电量显示.bat`。
-3. 程序启动后会打开电量面板，显示每台设备的名称、电量百分比、状态和进度条。面板底部可设置低电量提醒阈值（5%–100%，以 5% 递增），点“保存”后立即生效；“测试通知”会发送 Windows Toast 通知。未充电设备降至阈值时会发送一次通知；回升到阈值以上 5 个百分点或开始充电后重新启用提醒。专注模式会按 Windows 的通知优先级规则隐藏横幅，可在 Windows「设置 → 系统 → 通知 → 请勿打扰」中将 LogiBattery 加入优先通知。程序会在当前用户开始菜单登记通知快捷方式。勾选“登录 Windows 时自动启动”会在当前用户的 Windows 启动文件夹创建快捷方式；取消勾选会移除自启动快捷方式。关闭面板会将程序收进托盘；点击托盘图标可重新打开，右键菜单可刷新或退出。启动脚本会保留控制台窗口以显示错误信息。
+LogiBattery 专注于电量显示和提醒，不负责 DPI、按键映射、宏或固件更新等设备配置。需要这些功能时，仍可按需使用 Logitech 官方软件。
 
-## 打包为 Windows 应用
+## 下载与使用
 
-在已安装 Python 的开发电脑上双击 `build_windows.bat`。脚本先生成便于诊断的目录版，再生成单文件版：`dist\LogiBattery.exe`。将该 exe 复制到目标 Windows 电脑即可运行，无需安装 Python 或额外驱动。程序启动后直接显示电量面板，关闭面板后可从托盘重新打开。首次启动时 Windows SmartScreen 可能对未签名程序显示提示。
+Windows 单文件版发布后，可在 [GitHub Releases](https://github.com/shiker1996/logi-battery/releases) 下载 `LogiBattery-版本号-windows-x64.exe`。文件约 20 MB，双击即可启动，不需要安装 Python、Logitech 软件或额外驱动。首次运行时，Windows SmartScreen 可能会提示确认。
 
-### 从 GitHub Releases 下载
+启动后会打开设备电量面板，显示设备名称、电量、状态和进度条。程序每 3 分钟刷新一次；底部可以设置低电量提醒阈值（5%–100%，每次调整 5%），并点击“测试通知”检查 Windows 通知。关闭面板会将程序收进托盘；可从托盘重新打开，也可勾选“登录 Windows 时自动启动”。
 
-向 GitHub 推送 `v` 开头的版本标签后，GitHub Actions 会自动在 Windows Runner 上构建单文件程序，并创建对应 Release，附上 `LogiBattery-版本号-windows-x64.exe`。例如：
+如果你要从源码运行：双击 `setup.bat` 安装运行依赖，再双击 `启动电量显示.bat`。
+
+## 低电量提醒与通知
+
+未充电的设备降到设定阈值时，程序会发送一次 Windows 通知。电量回升到阈值以上 5 个百分点，或设备开始充电后，会重新启用提醒。
+
+Windows 的“请勿打扰”或专注模式可能隐藏通知横幅。若希望 LogiBattery 在请勿打扰期间仍显示横幅，可在 Windows「设置 → 系统 → 通知 → 请勿打扰 → 设置优先通知」中将 LogiBattery 加入允许的应用。
+
+## 支持范围
+
+- Logitech Logi Bolt、Unifying、部分 Lightspeed 接收器上的 HID++ 设备。
+- 通过 USB 数据线直连，且支持 HID++ 的 Logitech 设备。
+- 优先显示设备固件报告的电量百分比。设备只报告电池电压时，会用通用单节锂电池曲线换算，并标注“约”；估算值会受电池型号、负载和温度影响。
+- 不同品牌的 2.4 GHz 接收器协议各异，其他品牌设备需要单独适配。
+
+LogiBattery 使用只读 HID++ 请求读取电量、设备名称和类别，不发起配对或修改设备配置。
+
+## 从 GitHub 发布 Windows 版本
+
+向 GitHub 推送 `v` 开头的版本标签后，GitHub Actions 会在 Windows Runner 上构建单文件程序，并将 `LogiBattery-版本号-windows-x64.exe` 附加到对应 Release。例如：
 
 ```powershell
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.0.1
+git push origin v1.0.1
 ```
 
-构建完成后，在仓库的 Releases 页面下载 exe。该流程见 `.github/workflows/release.yml`。
+工作流配置在 `.github/workflows/release.yml`。
 
-如果单文件版无法启动，可先运行 `dist\debug\LogiBattery-debug\LogiBattery-debug.exe` 排查。运行日志保存在 `%LOCALAPPDATA%\LogiBattery\battery_monitor.log`。
+## 本机自行打包
 
-无需管理员权限或内核驱动。程序每 3 分钟刷新一次，同一时间只运行一个实例；低电量提醒最多会比实时状态延迟约 3 分钟。关闭或休眠中的设备可能暂时不响应，程序会在下一次刷新重试。
+在已安装 Python 的 Windows 开发电脑上双击 `build_windows.bat`。脚本会生成诊断目录版和单文件版，输出位置分别为 `dist\debug\LogiBattery-debug\LogiBattery-debug.exe` 与 `dist\LogiBattery.exe`。
 
-## 当前支持范围
-
-- Logitech Logi Bolt、Unifying、部分 Lightspeed 接收器上的 HID++ 配对设备，以及 USB 数据线直连且支持 HID++ 的设备。
-- 优先显示设备固件报告的电量百分比。设备只提供电池电压时，会按通用单节锂电池曲线换算，并以“约”标记，同时显示读取到的电压；该估算会受电池型号、负载和温度影响。
-- 其他品牌的 2.4 GHz 接收器协议彼此不同，需要单独适配。
-
-## 说明
-
-实现基于 Windows HIDAPI 和公开的 HID++ 请求格式。查询只读电量、设备名称和设备类别，不发起配对或写配置。
+如单文件版无法启动，可先运行诊断目录版。运行日志保存在 `%LOCALAPPDATA%\LogiBattery\battery_monitor.log`。程序无需管理员权限或内核驱动；关闭或休眠中的设备可能暂时不响应，会在下一次刷新时重试。
