@@ -1,0 +1,46 @@
+name: Build and publish Windows release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt -r requirements-build.txt
+
+      - name: Build Windows executable
+        run: >-
+          python -m PyInstaller --noconfirm --clean --onefile --windowed
+          --name LogiBattery --icon assets/LogiBattery.ico
+          --distpath dist --workpath build/onefile battery_monitor.py
+
+      - name: Name release asset
+        shell: pwsh
+        run: |
+          $assetName = "LogiBattery-$env:GITHUB_REF_NAME-windows-x64.exe"
+          Copy-Item dist/LogiBattery.exe "dist/$assetName"
+          "RELEASE_ASSET=dist/$assetName" >> $env:GITHUB_ENV
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh release create $env:GITHUB_REF_NAME $env:RELEASE_ASSET
+          --title "LogiBattery $env:GITHUB_REF_NAME"
+          --generate-notes --verify-tag

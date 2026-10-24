@@ -12,6 +12,17 @@ Windows 电量面板小工具，针对 Logitech Logi Bolt / Unifying / 部分 Li
 
 在已安装 Python 的开发电脑上双击 `build_windows.bat`。脚本先生成便于诊断的目录版，再生成单文件版：`dist\LogiBattery.exe`。将该 exe 复制到目标 Windows 电脑即可运行，无需安装 Python 或额外驱动。程序启动后直接显示电量面板，关闭面板后可从托盘重新打开。首次启动时 Windows SmartScreen 可能对未签名程序显示提示。
 
+### 从 GitHub Releases 下载
+
+向 GitHub 推送 `v` 开头的版本标签后，GitHub Actions 会自动在 Windows Runner 上构建单文件程序，并创建对应 Release，附上 `LogiBattery-版本号-windows-x64.exe`。例如：
+
+```powershell
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+构建完成后，在仓库的 Releases 页面下载 exe。该流程见 `.github/workflows/release.yml`。
+
 如果单文件版无法启动，可先运行 `dist\debug\LogiBattery-debug\LogiBattery-debug.exe` 排查。运行日志保存在 `%LOCALAPPDATA%\LogiBattery\battery_monitor.log`。
 
 无需管理员权限或内核驱动。程序每 3 分钟刷新一次，同一时间只运行一个实例；低电量提醒最多会比实时状态延迟约 3 分钟。关闭或休眠中的设备可能暂时不响应，程序会在下一次刷新重试。
