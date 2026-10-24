@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "要打包的版本标签，例如 v1.0.0"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -11,10 +17,14 @@ permissions:
 jobs:
   build-and-release:
     runs-on: windows-latest
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
 
     steps:
       - name: Check out source
         uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref }}
 
       - name: Set up Python
         uses: actions/setup-python@v7
@@ -33,14 +43,22 @@ jobs:
       - name: Name release asset
         shell: pwsh
         run: |
-          $assetName = "LogiBattery-$env:GITHUB_REF_NAME-windows-x64.exe"
+          $assetName = "LogiBattery-$env:RELEASE_TAG-windows-x64.exe"
           Copy-Item dist/LogiBattery.exe "dist/$assetName"
           "RELEASE_ASSET=dist/$assetName" >> $env:GITHUB_ENV
 
-      - name: Create GitHub release
+      - name: Create release or upload asset
+        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: >-
-          gh release create $env:GITHUB_REF_NAME $env:RELEASE_ASSET
-          --title "LogiBattery $env:GITHUB_REF_NAME"
-          --generate-notes --verify-tag
+        run: |
+          $tag = $env:RELEASE_TAG
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag $env:RELEASE_ASSET --clobber
+          } else {
+            gh release create $tag $env:RELEASE_ASSET --title "LogiBattery $tag" --generate-notes --verify-tag
+          }
+          if ($LASTEXITCODE -ne 0) {
+            throw "GitHub Release packaging failed for $tag."
+          }

@@ -40,6 +40,8 @@ git push origin v1.0.1
 
 工作流配置在 `.github/workflows/release.yml`。
 
+如果该标签对应的 Release 已经由网页提前创建，或需要重新打包，可在仓库的 **Actions → Build and publish Windows release → Run workflow** 中填写标签（例如 `v1.0.0`）。工作流会将 exe 上传到现有 Release；同名文件会被替换。
+
 ## 本机自行打包
 
 在已安装 Python 的 Windows 开发电脑上双击 `build_windows.bat`。脚本会生成诊断目录版和单文件版，输出位置分别为 `dist\debug\LogiBattery-debug\LogiBattery-debug.exe` 与 `dist\LogiBattery.exe`。
