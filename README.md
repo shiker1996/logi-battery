@@ -1,24 +1,33 @@
-# LogiBattery
+<div align="center">
+  <img src="./assets/logibattery-banner.svg" alt="LogiBattery：兼容设备电量，一眼看清" width="100%" />
+  <br />
+  <p>
+    <a href="https://github.com/shiker1996/logi-battery/releases/latest"><img src="https://img.shields.io/github/v/release/shiker1996/logi-battery?style=flat-square&color=26A69A" alt="Latest release" /></a>
+    <img src="https://img.shields.io/badge/platform-Windows-2563EB?style=flat-square&logo=windows&logoColor=white" alt="Windows" />
+    <img src="https://img.shields.io/badge/connection-USB%20%2F%20receiver-475569?style=flat-square" alt="USB and receiver" />
+  </p>
+  <p><strong>给 Logitech / Logi 键盘和鼠标用户的轻量电量面板。</strong></p>
+  <p>如果你平时需要打开 G HUB 或 Logi Options+ 才能查看电量，LogiBattery 可以显示兼容设备的电量与充电状态，并在电量偏低时发送 Windows 通知。</p>
+  <p><a href="#下载与使用">下载</a> · <a href="#支持范围">支持范围</a> · <a href="#低电量提醒">低电量提醒</a> · <a href="#本机自行打包">从源码构建</a></p>
+</div>
 
-给已经在用 Logitech / Logi 键盘和鼠标的 Windows 用户。
+---
 
-如果你平时只是为了查看键鼠电量，才需要安装或打开 **Logitech G HUB**、**Logi Options+**，LogiBattery 可以直接显示兼容设备的电量与充电状态，并在电量偏低时发送 Windows 通知。对支持的设备来说，查看电量不需要让这两个官方软件常驻运行。
+## 功能一览
 
-LogiBattery 专注于电量显示和提醒，不负责 DPI、按键映射、宏或固件更新等设备配置。需要这些功能时，仍可按需使用 Logitech 官方软件。
+| 电量面板 | 低电量提醒 | 轻量运行 |
+| --- | --- | --- |
+| 查看设备名称、电量、充电状态和进度条 | 阈值可调，发送 Windows 通知 | 每 3 分钟刷新；关闭窗口后收在系统托盘 |
+
+LogiBattery 专注于电量显示和提醒，不负责 DPI、按键映射、宏或固件更新等设备配置。需要这些功能时，仍可按需使用 Logitech 官方软件。对支持的设备来说，查看电量不需要让 G HUB 或 Logi Options+ 常驻运行。
 
 ## 下载与使用
 
-Windows 单文件版发布后，可在 [GitHub Releases](https://github.com/shiker1996/logi-battery/releases) 下载 `LogiBattery-版本号-windows-x64.exe`。文件约 20 MB，双击即可启动，不需要安装 Python、Logitech 软件或额外驱动。首次运行时，Windows SmartScreen 可能会提示确认。
+前往 [GitHub Releases](https://github.com/shiker1996/logi-battery/releases) 下载最新的 `LogiBattery-版本号-windows-x64.exe`。Windows 单文件版约 20 MB，双击即可启动，不需要安装 Python、Logitech 软件或额外驱动。首次运行时，Windows SmartScreen 可能会提示确认。
 
-启动后会打开设备电量面板，显示设备名称、电量、状态和进度条。程序每 3 分钟刷新一次；底部可以设置低电量提醒阈值（5%–100%，每次调整 5%），并点击“测试通知”检查 Windows 通知。关闭面板会将程序收进托盘；可从托盘重新打开，也可勾选“登录 Windows 时自动启动”。
+启动后会打开设备电量面板。底部可以设置低电量提醒阈值（5%–100%，每次调整 5%），并点击“测试通知”检查 Windows 通知。关闭面板会将程序收进托盘；可从托盘重新打开，也可勾选“登录 Windows 时自动启动”。
 
 如果你要从源码运行：双击 `setup.bat` 安装运行依赖，再双击 `启动电量显示.bat`。
-
-## 低电量提醒与通知
-
-未充电的设备降到设定阈值时，程序会发送一次 Windows 通知。电量回升到阈值以上 5 个百分点，或设备开始充电后，会重新启用提醒。
-
-Windows 的“请勿打扰”或专注模式可能隐藏通知横幅。若希望 LogiBattery 在请勿打扰期间仍显示横幅，可在 Windows「设置 → 系统 → 通知 → 请勿打扰 → 设置优先通知」中将 LogiBattery 加入允许的应用。
 
 ## 支持范围
 
@@ -28,6 +37,12 @@ Windows 的“请勿打扰”或专注模式可能隐藏通知横幅。若希望
 - 不同品牌的 2.4 GHz 接收器协议各异，其他品牌设备需要单独适配。
 
 LogiBattery 使用只读 HID++ 请求读取电量、设备名称和类别，不发起配对或修改设备配置。
+
+## 低电量提醒
+
+未充电的设备降到设定阈值时，程序会发送一次 Windows 通知。电量回升到阈值以上 5 个百分点，或设备开始充电后，会重新启用提醒。
+
+Windows 的“请勿打扰”或专注模式可能隐藏通知横幅。若希望 LogiBattery 在请勿打扰期间仍显示横幅，可在 Windows「设置 → 系统 → 通知 → 请勿打扰 → 设置优先通知」中将 LogiBattery 加入允许的应用。
 
 ## 从 GitHub 发布 Windows 版本
 

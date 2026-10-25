@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="360" viewBox="0 0 1200 360" fill="none">
+  <defs>
+    <linearGradient id="background" x1="38" y1="18" x2="1156" y2="373" gradientUnits="userSpaceOnUse"><stop stop-color="#101827"/><stop offset=".56" stop-color="#14283B"/><stop offset="1" stop-color="#10323A"/></linearGradient>
+    <linearGradient id="accent" x1="793" y1="48" x2="1128" y2="326" gradientUnits="userSpaceOnUse"><stop stop-color="#57E3C1"/><stop offset="1" stop-color="#60A5FA"/></linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientTransform="matrix(0 204 -296 0 1000 163)" gradientUnits="userSpaceOnUse"><stop stop-color="#34D5BD" stop-opacity=".23"/><stop offset="1" stop-color="#34D5BD" stop-opacity="0"/></radialGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" stroke="#AFC5D8" stroke-opacity=".07"/></pattern>
+  </defs>
+  <rect width="1200" height="360" rx="26" fill="url(#background)"/>
+  <rect width="1200" height="360" rx="26" fill="url(#grid)"/>
+  <rect width="1200" height="360" rx="26" fill="url(#halo)"/>
+  <path d="M760 0v66h84v43h69V76h83v49h70V91h134" stroke="url(#accent)" stroke-opacity=".45" stroke-width="2"/>
+  <path d="M746 360v-62h101v-39h71v23h86v-51h72v31h124" stroke="url(#accent)" stroke-opacity=".36" stroke-width="2"/>
+  <g fill="#70E7D0"><circle cx="844" cy="66" r="4"/><circle cx="996" cy="76" r="4"/><circle cx="918" cy="259" r="4"/></g>
+  <text x="76" y="93" fill="#A8C2D2" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="600" letter-spacing="4">WINDOWS  ·  HID++ BATTERY MONITOR</text>
+  <text x="72" y="174" fill="#F5FAFF" font-family="Segoe UI,Arial,sans-serif" font-size="58" font-weight="700" letter-spacing="-.8">LogiBattery</text>
+  <rect x="77" y="199" width="54" height="4" rx="2" fill="url(#accent)"/>
+  <text x="76" y="245" fill="#D8E5EF" font-family="Segoe UI,Microsoft YaHei,sans-serif" font-size="24" font-weight="600">兼容设备电量，一眼看清</text>
+  <text x="77" y="281" fill="#A8C2D2" font-family="Segoe UI,Microsoft YaHei,sans-serif" font-size="16">键盘与鼠标电量面板 · 低电量 Windows 通知</text>
+  <g transform="translate(850 100)">
+    <rect x="23" y="26" width="255" height="158" rx="23" fill="#0A1622" fill-opacity=".66" stroke="#8AE6D8" stroke-opacity=".35"/>
+    <rect x="45" y="46" width="210" height="76" rx="11" fill="#172B3B" stroke="#B5D9DE" stroke-opacity=".4"/>
+    <g fill="#91AFC0" fill-opacity=".78">
+      <rect x="56" y="57" width="25" height="17" rx="4"/><rect x="87" y="57" width="25" height="17" rx="4"/><rect x="118" y="57" width="25" height="17" rx="4"/><rect x="149" y="57" width="25" height="17" rx="4"/><rect x="180" y="57" width="25" height="17" rx="4"/><rect x="211" y="57" width="32" height="17" rx="4"/>
+      <rect x="56" y="81" width="29" height="17" rx="4"/><rect x="91" y="81" width="25" height="17" rx="4"/><rect x="122" y="81" width="25" height="17" rx="4"/><rect x="153" y="81" width="25" height="17" rx="4"/><rect x="184" y="81" width="59" height="17" rx="4"/>
+      <rect x="56" y="105" width="37" height="9" rx="4.5"/><rect x="99" y="105" width="102" height="9" rx="4.5"/><rect x="207" y="105" width="36" height="9" rx="4.5"/>
+    </g>
+    <g transform="translate(119 137)">
+      <path d="M46 0c-22 0-37 16-37 38v21c0 27 17 44 37 44s37-17 37-44V38C83 16 68 0 46 0Z" fill="#172B3B" stroke="#B5D9DE" stroke-opacity=".55" stroke-width="2"/>
+      <path d="M46 2v27" stroke="#B5D9DE" stroke-opacity=".65" stroke-width="2"/>
+      <path d="M46 2c-19 0-32 14-32 35v10h32V2Z" fill="url(#accent)" fill-opacity=".5"/>
+      <path d="M46 2v45" stroke="#B5D9DE" stroke-opacity=".55" stroke-width="2"/>
+    </g>
+    <g transform="translate(30 216)">
+      <text x="0" y="0" fill="#D8E5EF" font-family="Segoe UI,Arial,sans-serif" font-size="12" letter-spacing="1.5">BATTERY STATUS</text>
+      <rect x="0" y="13" width="236" height="10" rx="5" fill="#33495A"/>
+      <rect x="0" y="13" width="168" height="10" rx="5" fill="url(#accent)"/>
+      <text x="244" y="23" fill="#F5FAFF" font-family="Segoe UI,Arial,sans-serif" font-size="23" font-weight="700">72%</text>
+    </g>
+  </g>
+</svg>
