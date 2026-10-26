@@ -13,7 +13,7 @@ import time
 import ctypes
 import sys
 import winreg
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime
 from pathlib import Path
 import tkinter as tk
@@ -292,35 +292,47 @@ class LogitechReceiver:
         # HID++ device indices 1..6 are used by Logitech Bolt/Unifying and
         # Lightspeed receivers. Empty slots simply time out.
         for slot in range(1, 7):
-            if not self._slot_is_paired(slot):
-                continue
-            # Bolt devices can answer the receiver's pairing-info register
-            # before their HID++ feature channel is ready. Retry the read-only
-            # feature queries so a cold start does not silently omit a device.
-            name, kind = None, None
-            battery = None
-            for attempt in range(3):
-                if name is None:
-                    candidate_name, candidate_kind = self._name_and_kind(slot)
-                    name = candidate_name or name
-                    if candidate_kind is not None:
-                        kind = candidate_kind
-                if battery is None:
-                    battery = self._battery(slot)
-                if name is not None and battery is not None:
-                    break
-                if attempt < 2:
-                    time.sleep(0.12)
-            if name is None and battery is None:
-                continue
-            role = _device_category(kind)
-            label = name or f"罗技{role}（槽位 {slot}）"
-            result = battery
-            if result is None:
-                found.append(DeviceBattery(label, None, "设备未返回电量", role, "无线接收器"))
-            else:
-                found.append(
-                    DeviceBattery(label, result[0], result[1], role, "无线接收器", result[2], result[3])
+            try:
+                if not self._slot_is_paired(slot):
+                    # A missed receiver reply used to hide this slot for the
+                    # whole refresh. Retry once before treating it as empty.
+                    time.sleep(0.08)
+                    if not self._slot_is_paired(slot):
+                        continue
+                # Bolt devices can answer the receiver's pairing-info register
+                # before their HID++ feature channel is ready. Retry the read-only
+                # feature queries so a cold start does not silently omit a device.
+                name, kind = None, None
+                battery = None
+                for attempt in range(3):
+                    if name is None:
+                        candidate_name, candidate_kind = self._name_and_kind(slot)
+                        name = candidate_name or name
+                        if candidate_kind is not None:
+                            kind = candidate_kind
+                    if battery is None:
+                        battery = self._battery(slot)
+                    if name is not None and battery is not None:
+                        break
+                    if attempt < 2:
+                        time.sleep(0.12)
+                if name is None and battery is None:
+                    continue
+                role = _device_category(kind)
+                label = name or f"罗技{role}（槽位 {slot}）"
+                result = battery
+                if result is None:
+                    found.append(DeviceBattery(label, None, "设备未返回电量", role, "无线接收器"))
+                else:
+                    found.append(
+                        DeviceBattery(label, result[0], result[1], role, "无线接收器", result[2], result[3])
+                    )
+            except Exception:
+                LOG.exception(
+                    "Could not read receiver slot %d (%04X:%04X)",
+                    slot,
+                    self.vid,
+                    self.pid,
                 )
         return found
 
@@ -432,7 +444,10 @@ def _format_device_status(device: DeviceBattery) -> str:
             details.append(f"电压估算 {device.voltage_mv / 1000:.2f} V")
         else:
             details.append("电压估算")
-    details.append(device.state)
+    if device.connected:
+        details.append(device.state)
+    else:
+        details.append("暂时未响应 · 显示上次电量")
     return "  ·  ".join(details)
 
 
@@ -726,13 +741,26 @@ class BatteryTray:
             current = by_name.get(key)
             if current is None or device.transport == "USB 直连":
                 by_name[key] = device
-        devices = list(by_name.values())
-        LOG.info("Battery scan found %d device(s): %s", len(devices), devices)
+        fresh_devices = list(by_name.values())
         with self._lock:
+            fresh_names = set(by_name)
+            devices = list(fresh_devices)
+            # Keep a device visible for one missed scan so a single receiver
+            # timeout does not make it disappear from the panel.
+            for previous in self._devices:
+                key = " ".join(previous.name.casefold().split())
+                if previous.connected and key not in fresh_names:
+                    devices.append(replace(previous, connected=False))
             self._devices = devices
             self._refreshing = False
+        LOG.info(
+            "Battery scan found %d responsive device(s), displaying %d: %s",
+            len(fresh_devices),
+            len(devices),
+            devices,
+        )
         self._update_tray()
-        self._notify_low_battery(devices)
+        self._notify_low_battery(fresh_devices)
         threading.Timer(POLL_SECONDS, self.refresh_async).start()
 
     def _notify_low_battery(self, devices: list[DeviceBattery]) -> None:
@@ -826,13 +854,15 @@ class BatteryTray:
         if devices:
             tip = "\n".join(
                 f"{d.name}: {_format_level(d)}"
+                + ("（暂时未响应）" if not d.connected else "")
                 for d in devices
             )
             levels = [d.level for d in devices if d.level is not None]
             icon = _battery_icon(min(levels) if levels else None)
             entries = [
                 pystray.MenuItem(
-                    f"{d.category} · {d.name}  ·  {_format_level(d)}",
+                    f"{d.category} · {d.name}  ·  {_format_level(d)}"
+                    + (" · 暂时未响应" if not d.connected else ""),
                     None,
                     enabled=False,
                 )
@@ -1063,17 +1093,34 @@ class BatteryTray:
                     card, height=7, bg="#263341", highlightthickness=0, bd=0
                 )
                 bar.pack(fill="x")
-                bar.update_idletasks()
-                bar_width = max(0, bar.winfo_width())
-                fill_width = int(bar_width * (device.level or 0) / 100)
-                if fill_width:
-                    bar.create_rectangle(
-                        0, 0, fill_width, 7, fill=_battery_color(device.level),
-                        outline="",
-                    )
+
+                def draw_battery_bar(_event=None, canvas=bar, level=device.level):
+                    canvas.delete("battery-level")
+                    if level is None:
+                        return
+                    fill_width = round(canvas.winfo_width() * level / 100)
+                    if fill_width > 0:
+                        canvas.create_rectangle(
+                            0,
+                            0,
+                            fill_width,
+                            canvas.winfo_height(),
+                            fill=_battery_color(level),
+                            outline="",
+                            tags="battery-level",
+                        )
+
+                bar.bind("<Configure>", draw_battery_bar)
+                bar.after_idle(draw_battery_bar)
+            stale = any(not device.connected for device in devices)
+            status_text = (
+                "正在更新电量…" if refreshing
+                else "部分设备暂时未响应，显示上次电量" if stale
+                else "设备已连接"
+            )
             self._panel_status.config(
-                text="设备已连接" if not refreshing else "正在更新电量…",
-                fg="#8DA0B4" if not refreshing else "#75E2D0",
+                text=status_text,
+                fg="#75E2D0" if refreshing else "#F0B34D" if stale else "#8DA0B4",
             )
         else:
             message = "正在读取接收器…" if refreshing else "暂未发现支持的设备"
