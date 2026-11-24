@@ -26,3 +26,5 @@ rules:
       - "scripts/approvals_check.py"
       - ".github/workflows/approvals.yml"
     seats: 2
+
+# act 3: a harmless inline comment inside the policy file
