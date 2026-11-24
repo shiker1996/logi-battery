@@ -21,3 +21,6 @@ rules:
       - "scripts/approvals_check.py"
       - ".github/workflows/approvals.yml"
     seats: 2
+
+# 第二次验证用的无害改动：只要本文件出现在 diff 里，
+# review-rules 就匹配，门槛应从 1 人升到 2 人。
