@@ -1,0 +1,27 @@
+name: approvals
+
+# 只对目标为 ship-demo 的 PR 生效，避免影响仓库其他分支的流程。
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [ship-demo]
+
+# 最小权限：读代码与评审，写 commit status。
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+jobs:
+  approvals-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 评估审批策略
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: python3 scripts/approvals_check.py

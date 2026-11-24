@@ -1,0 +1,23 @@
+# .approvals.yml
+# 策略即配置：按路径规定一次变更需要几个人批准。
+# 这是 demo 用的最小实现，语义参照 Claude Ship 的 approvals 策略：
+#   - paths   : 匹配的文件路径模式（** 表示任意层级）
+#   - seats   : 该路径下变更需要的最少批准人数（作者本人不算）
+# 匹配到多条规则时，取 seats 的最大值。
+
+version: 1
+
+rules:
+  - name: default
+    paths:
+      - "**"
+    seats: 1
+
+  # 审批规则本身属于"元变更"：改规则的人可能需要放宽自己的门禁，
+  # 所以这里提高门槛，避免策略被顺手改松。
+  - name: review-rules
+    paths:
+      - ".approvals.yml"
+      - "scripts/approvals_check.py"
+      - ".github/workflows/approvals.yml"
+    seats: 2
