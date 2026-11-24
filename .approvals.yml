@@ -1,9 +1,10 @@
 # .approvals.yml
 # 策略即配置：按路径规定一次变更需要几个人批准。
-# 这是 demo 用的最小实现，语义参照 Claude Ship 的 approvals 策略：
-#   - paths   : 匹配的文件路径模式（** 表示任意层级）
-#   - seats   : 该路径下变更需要的最少批准人数（作者本人不算）
-# 匹配到多条规则时，取 seats 的最大值。
+# 语义参照 Claude Ship 的 approvals 策略：
+#   - paths    : 匹配的文件路径模式（** 表示任意层级）
+#   - seats    : 该路径下变更需要的最少批准人数（作者本人不算）
+#   - override : 条件满足时降低门檻。目前只支持引用某个 commit status 是否通过。
+# 匹配到多条规则时，取最终 seats 的最大值。
 
 version: 1
 
@@ -12,9 +13,13 @@ rules:
     paths:
       - "**"
     seats: 1
+    override:
+      # AI 审查通过，可以代 1 人批准 —— 这就是「AI 成为那个批准人」。
+      - when_status: ai-review
+        seats: 0
 
-  # 审批规则本身属于"元变更"：改规则的人可能需要放宽自己的门禁，
-  # 所以这里提高门槛，避免策略被顺手改松。
+  # 「元变更」：改规则的人可能想放宽自己的门禁，所以这里不给 AI 任何抵消空间。
+  # AI 可以批准别人的代码，但不能给自己放权。
   - name: review-rules
     paths:
       - ".approvals.yml"
